@@ -6,5 +6,78 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>NASA Mars Photos Gallery</title>
   </head>
-  <body></body>
+  <body>
+    <div id="form-loader" class="loader"></div>
+    <form id="search-form" class="hidden">
+      <fieldset>
+        <legend>NASA Mars Photos Gallery</legend>
+
+        <div>
+          <p><strong>Date</strong></p>
+          <ul id="dates">
+            <li>
+              <label for="startDate">Start date</label>
+              <input type="date" name="startDate" id="startDate" />
+            </li>
+            <li>
+              <label for="endDate">End date</label>
+              <input type="date" name="endDate" id="endDate" />
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <p><strong>Rovers</strong></p>
+
+          <ul id="rovers"></ul>
+        </div>
+
+        <div>
+          <p><strong>Rover Cameras</strong></p>
+          <ul id="cameras">
+            <li>
+              <input type="checkbox" class="camera--disabled" name="FHAZ" id="FHAZ" disabled />
+              <label for="FHAZ">Front Hazard Avoidance Camera</label>
+            </li>
+            <li>
+              <input type="checkbox" class="camera--disabled" name="RHAZ" id="RHAZ" disabled />
+              <label for="RHAZ">Rear Hazard Avoidance Camera</label>
+            </li>
+            <li>
+              <input type="checkbox" class="camera--disabled" name="MAST" id="MAST" disabled />
+              <label for="MAST">Mast Camera</label>
+            </li>
+            <li>
+              <input type="checkbox" class="camera--disabled" name="CHEMCAM" id="CHEMCAM" disabled />
+              <label for="CHEMCAM">Chemistry and Camera Complex</label>
+            </li>
+            <li>
+              <input type="checkbox" class="camera--disabled" name="MAHLI" id="MAHLI" disabled />
+              <label for="MAHLI">Mars Hand Lens Imager</label>
+            </li>
+            <li>
+              <input type="checkbox" class="camera--disabled" name="MARDI" id="MARDI" disabled />
+              <label for="MARDI">Mars Descent Imager</label>
+            </li>
+            <li>
+              <input type="checkbox" class="camera--disabled" name="NAVCAM" id="NAVCAM" disabled />
+              <label for="NAVCAM">Navigation Camera</label>
+            </li>
+            <li>
+              <input type="checkbox" class="camera--disabled" name="PANCAM" id="PANCAM" disabled />
+              <label for="PANCAM">Panoramic Camera</label>
+            </li>
+            <li>
+              <input type="checkbox" class="camera--disabled" name="MINITES" id="MINITES" disabled />
+              <label for="MINITES">Miniature Thermal Emission Spectrometer (Mini-TES)</label>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <button type="submit">Search</button>
+        </div>
+      </fieldset>
+    </form>
+  </body>
 </html>

@@ -1,7 +1,13 @@
+const webpack = require('webpack');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
+  entry: ['babel-polyfill', './src/index.js'],
+
+  // output: {
+  //   filename: 'bundle.js'
+  // },
   module: {
     rules: [
       {
@@ -48,6 +54,14 @@ module.exports = {
       // all options are optional
       filename: '[name].css',
       chunkFilename: '[id].css'
+    }),
+
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: JSON.stringify('development'),
+        API_URL: JSON.stringify('https://api.nasa.gov/mars-photos/api/v1'),
+        API_KEY: JSON.stringify('5zbOSX8Xn2l632bf0Zf9UEyyEeX5dyRbK773t90j')
+      }
     })
   ]
 };
