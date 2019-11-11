@@ -1,4 +1,81 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.thumbnails {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.thumbnail {
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100px;
+  justify-content: space-between;
+}
+
+.thumbnail__image,
+.thumbnail__image.loader {
+  max-width: 100%;
+  object-fit: cover;
+}
+
+.thumbnail__description {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.thumbnail__basket {
+  display: none;
+}
+
+.thumbnail--popup {
+  width: 75%;
+  height: 75%;
+  background-color: #fff;
+}
+
+.thumbnail--popup .thumbnail__image {
+  width: 100%;
+  height: 90%;
+}
+
+.popup .thumbnail__basket {
+  display: flex;
+}
+
+.image-grid {
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
+}
+
+.image-grid__image {
+  width: 100px;
+  height: 100px;
+}
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba($color: #000000, $alpha: 0.85);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .loader {
+  box-sizing: border-box;
   border: 16px solid #f3f3f3;
   border-radius: 50%;
   border-top: 16px solid #3498db;
@@ -29,4 +106,50 @@
 
 .hidden {
   display: none;
+}
+
+.flip-out {
+  -webkit-animation: flip-out 2s linear forwards;
+  -moz-animation: flip-out 2s linear forwards;
+  animation: flip-out 2s linear forwards;
+}
+
+@keyframes flip-out {
+  0% {
+    opacity: 1;
+  }
+
+  99% {
+    opacity: 1;
+  }
+
+  100% {
+    -webkit-transform: rotateY(90deg);
+    transform: rotateY(90deg);
+    opacity: 0;
+  }
+}
+
+.flip-in {
+  -webkit-animation: flip-in 2s linear forwards;
+  -moz-animation: flip-in 2s linear forwards;
+  animation: flip-in 2s linear forwards;
+}
+
+@keyframes flip-in {
+  0% {
+    -webkit-transform: rotateY(90deg);
+    transform: rotateY(90deg);
+    opacity: 0;
+  }
+
+  1% {
+    opacity: 1;
+  }
+
+  100% {
+    -webkit-transform: rotateY(0deg);
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
 }

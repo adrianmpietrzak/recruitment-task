@@ -1,23 +1,34 @@
+import 'normalize.css';
+
 import './styles/global.scss';
 
-const apiUrl = process.env.API_URL;
-const apiKey = process.env.API_KEY;
+const createElement = ({ tag, text, classes, attributes }) => {
+  const element = document.createElement(tag);
+  text ? (element.innerText = text) : null;
+  classes ? element.classList.add(...classes) : null;
+  attributes ? attributes.map(attribute => element.setAttribute(attribute.type, attribute.value)) : null;
 
-console.log(`${apiUrl}/rovers?api_key=${apiKey}`);
+  return element;
+};
 
 class Form {
-  constructor({ form, formLoader, dateList, roversList, camerasList }) {
-    this.form = document.querySelector(form);
-    this.formLoader = document.querySelector(formLoader);
+  constructor({ formSelector, formLoaderSeletor, thumbnailsSelector, basketSelector, popupSelector, apiUrl, apiKey }) {
+    this.form = document.querySelector(formSelector);
+    this.formLoader = document.querySelector(formLoaderSeletor);
+    this.thumbnailsWrapper = document.querySelector(thumbnailsSelector);
+    this.basketWrapper = document.querySelector(basketSelector);
+    this.popupWrapper = document.querySelector(popupSelector);
+    this.apiUrl = apiUrl;
+    this.apiKey = apiKey;
 
-    this.dateList = this.form.querySelector(dateList);
-    this.roversList = this.form.querySelector(roversList);
-    this.camerasList = this.form.querySelector(camerasList);
+    this.dateList = this.form.querySelector('#dates');
+    this.roversList = this.form.querySelector('#rovers');
+    this.camerasList = this.form.querySelector('#cameras');
 
     this.dates = this.dateList.querySelectorAll('input');
     this.cameras = this.camerasList.querySelectorAll('input');
 
-    this.roversApi = `${apiUrl}/rovers?api_key=${apiKey}`;
+    this.roversApi = `${this.apiUrl}/rovers?api_key=${this.apiKey}`;
 
     this.rovers = [];
     this.roversAvailableCameras = [];
@@ -30,6 +41,7 @@ class Form {
     this.selectedCameras = [];
 
     this.results = [];
+    this.resultsGrid = null;
 
     this._init();
   }
@@ -63,6 +75,8 @@ class Form {
     this.form.addEventListener('submit', event => {
       event.preventDefault();
 
+      this.thumbnailsWrapper.classList.remove('hidden');
+
       this.results = [];
       this.dateRange = [];
 
@@ -92,7 +106,6 @@ class Form {
       let currentDate = startDate;
 
       while (currentDate <= stopDate) {
-        // console.log(currentDate);
         const date = new Date(currentDate);
         const formattedDate = this._formatDate(date);
         this.dateRange.push(formattedDate);
@@ -142,28 +155,27 @@ class Form {
 
           this.results.push(...filteredPhotos);
         } else {
-          const url = `${apiUrl}/rovers/${rover}/photos?earth_date=${date}&api_key=${apiKey}`;
+          const url = `${this.apiUrl}/rovers/${rover}/photos?earth_date=${date}&api_key=${this.apiKey}`;
           const request = this._createRequestPromise(url, localRoverResults, date, rover);
 
           requests.push(request);
         }
       });
     });
+    this.resultsGrid = null;
 
     Promise.all(requests).then(() => this._showResults());
   }
 
   _showResults() {
-    console.log('this.results = ', this.results);
-  }
-
-  _createElement({ tag, text, classes, attributes }) {
-    const element = document.createElement(tag);
-    text ? (element.innerText = text) : null;
-    classes ? element.classList.add(classes) : null;
-    attributes ? attributes.map(attribute => element.setAttribute(attribute.type, attribute.value)) : null;
-
-    return element;
+    if (this.results.length > 0) {
+      this.resultsGrid = new ResultsGrid({
+        results: this.results,
+        thumbnailsWrapper: this.thumbnailsWrapper,
+        basketWrapper: this.basketWrapper,
+        popupWrapper: this.popupWrapper
+      });
+    }
   }
 
   _checkUncheckInput(input, check, classes) {
@@ -221,8 +233,8 @@ class Form {
       const roverName = rover.name.replace('"', '');
       const roverID = roverName.replace(' ', '-').toLowerCase();
 
-      const roverItem = this._createElement({ tag: 'li' });
-      const roverInput = this._createElement({
+      const roverItem = createElement({ tag: 'li' });
+      const roverInput = createElement({
         tag: 'input',
         attributes: [
           { type: 'type', value: 'checkbox' },
@@ -241,7 +253,7 @@ class Form {
         this._getAvailableCameraToSelectedRovers();
       });
 
-      const roverLabel = this._createElement({
+      const roverLabel = createElement({
         tag: 'label',
         text: roverName,
         attributes: [{ type: 'for', value: roverID }]
@@ -275,11 +287,285 @@ class Form {
   }
 }
 
-const form = new Form({
-  form: '#search-form',
-  formLoader: '#form-loader',
-  dateList: '#dates',
-  roversList: '#rovers',
-  camerasList: '#cameras'
+class ResultsGrid {
+  constructor({ results, thumbnailsWrapper, basketWrapper, popupWrapper }) {
+    this.results = results;
+    this.thumbnailsWrapper = thumbnailsWrapper;
+    this.thumbnails = [];
+    this.basketThumbnailIndexes = [];
+
+    this.popupWrapper = popupWrapper;
+    this.basketWrapper = basketWrapper;
+
+    this.basket = new Basket({ wrapper: this.basketWrapper });
+    this.popup = new Popup({ wrapper: this.popupWrapper });
+
+    this._init();
+  }
+
+  _init() {
+    this.thumbnailsWrapper.classList.remove('loader');
+    this.results.map((result, resultIndex) => {
+      this._createThumbnail(result, resultIndex);
+    });
+
+    this.thumbnails.map(thumbnail => {
+      this.thumbnailsWrapper.appendChild(thumbnail);
+    });
+  }
+
+  _thumbnailImageClickListener(thumbnailIndex) {
+    this.popup.createPopupContent(this.thumbnails, thumbnailIndex, this.basket);
+    this.popup.show();
+  }
+
+  _createThumbnail(result, resultIndex) {
+    const thumbnail = createElement({
+      tag: 'div',
+      classes: ['thumbnail'],
+      attributes: [{ type: 'data-image', value: result.img_src }]
+    });
+
+    const thumbnailImage = createElement({
+      tag: 'img',
+      classes: ['thumbnail__image', 'loader']
+    });
+
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          thumbnailImage.setAttribute('src', result.img_src);
+          thumbnailImage.onload = () => thumbnailImage.classList.remove('loader');
+          observer.disconnect();
+        }
+      });
+    });
+
+    imageObserver.observe(thumbnailImage);
+
+    thumbnailImage.addEventListener('click', () => this._thumbnailImageClickListener(resultIndex));
+
+    const thumbnailDescription = createElement({
+      tag: 'div',
+      classes: ['thumbnail__description']
+    });
+
+    const dateTaken = createElement({
+      tag: 'span',
+      text: result.earth_date,
+      classes: ['thumbnail__date']
+    });
+
+    const roverName = createElement({
+      tag: 'span',
+      text: result.rover.name,
+      classes: ['thumbnail__rover']
+    });
+
+    thumbnailDescription.appendChild(dateTaken);
+    thumbnailDescription.appendChild(roverName);
+
+    thumbnail.appendChild(thumbnailImage);
+    thumbnail.appendChild(thumbnailDescription);
+
+    this.thumbnails.push(thumbnail);
+  }
+}
+
+class Popup {
+  constructor({ wrapper }) {
+    this.wrapper = wrapper;
+  }
+
+  show() {
+    this.wrapper.classList.remove('hidden');
+
+    this.wrapper.addEventListener('click', () => {
+      this.wrapper.innerHTML = '';
+      this.wrapper.classList.add('hidden');
+    });
+  }
+
+  createPopupContent(thumbnails, index, basket) {
+    const clonedThumbnail = thumbnails[index].cloneNode(true);
+    clonedThumbnail.classList.add('thumbnail--popup');
+
+    const thumbnailAddToBasket = createElement({
+      tag: 'div',
+      classes: ['thumbnail__basket']
+    });
+
+    const thumbnailAddToBasketBtn = createElement({
+      tag: 'button',
+      text: 'Add to basket',
+      classes: ['thumbnail__basket-btn']
+    });
+
+    thumbnailAddToBasketBtn.addEventListener('click', () => basket.createBasketThumbnail(thumbnails, index));
+
+    thumbnailAddToBasket.appendChild(thumbnailAddToBasketBtn);
+    clonedThumbnail.appendChild(thumbnailAddToBasket);
+
+    this.wrapper.appendChild(clonedThumbnail);
+
+    clonedThumbnail.addEventListener('click', event => event.stopPropagation());
+  }
+}
+
+class Basket {
+  constructor({ wrapper }) {
+    this.wrapper = wrapper;
+    this.startGrid = this.wrapper.querySelector('#start-grid');
+    this.basket = [];
+    this.basketThumbnailIndexes = [];
+
+    this.imageGrid = null;
+    this.imageGridUrls = [];
+
+    this._init();
+  }
+
+  _init() {
+    this.startGrid.addEventListener('click', () => {
+      this.imageGridUrls = [];
+      [...this.basket].map(thumbnail => {
+        this.imageGridUrls.push(thumbnail.getAttribute('data-image'));
+      });
+      this.imageGrid = new ImageGrid({ imagesUrls: this.imageGridUrls });
+      this.basket = [];
+    });
+  }
+
+  _checkStartGridAvailability() {
+    this.wrapper.classList[this.basketThumbnailIndexes.length > 0 ? 'remove' : 'add']('hidden');
+    this.startGrid[this.basketThumbnailIndexes.length >= 1 ? 'removeAttribute' : 'setAttribute']('disabled', 'true');
+  }
+
+  _changePositionUp(element) {
+    element.previousElementSibling !== null ? this.wrapper.insertBefore(element, element.previousElementSibling) : null;
+  }
+
+  _changePositionDown(element) {
+    element.nextElementSibling !== null && element.nextElementSibling !== this.startGrid
+      ? element.parentNode.insertBefore(element, element.nextSibling.nextSibling)
+      : null;
+  }
+
+  _deleteElement(element, thumbnailIndex) {
+    [...this.wrapper.children].map(child => (child === element ? child.remove() : null));
+    this.basketThumbnailIndexes = this.basketThumbnailIndexes.filter(index => index !== thumbnailIndex);
+    this.basket = this.basket.filter(basketElement => basketElement !== element);
+    this._checkStartGridAvailability();
+  }
+
+  createBasketThumbnail(thumbnails, thumbnailIndex) {
+    if (!this.basketThumbnailIndexes.includes(thumbnailIndex)) {
+      const basketThumbnail = thumbnails[thumbnailIndex].cloneNode(true);
+      basketThumbnail.classList.add('thumbnail--basket');
+
+      const basketThumbnailControls = createElement({
+        tag: 'div',
+        classes: ['basket-controls']
+      });
+
+      const basketThumbnailControlsUp = createElement({
+        tag: 'span',
+        text: '↑',
+        classes: ['basket-controls__up']
+      });
+
+      basketThumbnailControlsUp.addEventListener('click', () => this._changePositionUp(basketThumbnail));
+
+      const basketThumbnailControlsDown = createElement({
+        tag: 'span',
+        text: '↓',
+        classes: ['basket-controls__down']
+      });
+
+      basketThumbnailControlsDown.addEventListener('click', () => this._changePositionDown(basketThumbnail));
+
+      const basketThumbnailControlsDelete = createElement({
+        tag: 'span',
+        text: '-',
+        classes: ['basket-controls__delete']
+      });
+
+      basketThumbnailControlsDelete.addEventListener('click', () => this._deleteElement(basketThumbnail, thumbnailIndex));
+
+      basketThumbnailControls.appendChild(basketThumbnailControlsUp);
+      basketThumbnailControls.appendChild(basketThumbnailControlsDown);
+      basketThumbnailControls.appendChild(basketThumbnailControlsDelete);
+
+      basketThumbnail.appendChild(basketThumbnailControls);
+      this.wrapper.insertBefore(basketThumbnail, this.startGrid);
+      this.basketThumbnailIndexes.push(thumbnailIndex);
+      this.basket.push(basketThumbnail);
+
+      this._checkStartGridAvailability();
+    }
+  }
+}
+
+class ImageGrid {
+  constructor({ imagesUrls }) {
+    this.imagesUrls = imagesUrls;
+    this.uniqueImagesLength = this.imagesUrls.length;
+    this.fillImageList = [];
+    this.imageGrid = document.querySelector('#image-popup');
+
+    this._init();
+  }
+
+  _init() {
+    this.imageGrid.innerHTML = '';
+
+    const amountOfImages = Math.floor(window.innerHeight / 100) * Math.floor(window.innerWidth / 100);
+    let index = 0;
+
+    for (let i = 0; i < amountOfImages; i++) {
+      const img = this._createImage(this.imagesUrls[index]);
+      this.fillImageList.push(img);
+      this.imageGrid.appendChild(img);
+
+      index + 1 <= this.uniqueImagesLength - 1 ? index++ : (index = 0);
+    }
+
+    this.imageGrid.classList.remove('hidden');
+
+    this._rotateImages();
+  }
+
+  _createImage(imageUrl) {
+    const image = createElement({
+      tag: 'img',
+      classes: ['image-grid__image'],
+      attributes: [{ type: 'src', value: imageUrl }]
+    });
+
+    return image;
+  }
+
+  _rotateImages() {
+    setInterval(() => {
+      const flipOutRandomImage = this.fillImageList[Math.floor(Math.random() * this.fillImageList.length)];
+      const flipInRandomImageUrl = this.imagesUrls[Math.floor(Math.random() * this.imagesUrls.length)];
+      flipOutRandomImage.classList.remove('flip-in');
+      flipOutRandomImage.classList.add('flip-out');
+      setTimeout(() => {
+        flipOutRandomImage.classList.remove('flip-out');
+        flipOutRandomImage.classList.add('flip-in');
+        flipOutRandomImage.setAttribute('src', flipInRandomImageUrl);
+      }, 2000);
+    }, 4000);
+  }
+}
+
+new Form({
+  formSelector: '#search-form',
+  formLoaderSeletor: '#form-loader',
+  thumbnailsSelector: '#thumbnails',
+  basketSelector: '#basket',
+  popupSelector: '#thumbnail-popup',
+  apiUrl: process.env.API_URL,
+  apiKey: process.env.API_KEY
 });
-console.log(form);
