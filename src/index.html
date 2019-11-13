@@ -7,82 +7,172 @@
     <title>NASA Mars Photos Gallery</title>
   </head>
   <body>
-    <div id="form-loader" class="loader"></div>
-    <form id="search-form" class="hidden">
-      <fieldset>
-        <legend>NASA Mars Photos Gallery</legend>
+    <div id="form-loader" class="popup popup--nobg">
+      <div class="loader"></div>
+    </div>
 
-        <div>
-          <p><strong>Date</strong></p>
-          <ul id="dates">
-            <li>
-              <label for="startDate">Start date</label>
-              <input type="date" name="startDate" id="startDate" />
+    <form id="search-form" class="search-form hidden">
+      <fieldset class="search-form__fieldset">
+        <legend class="search-form__legend">NASA Mars Photos Gallery</legend>
+        <div class="form-entry">
+          <p class="form-entry__title"><strong>Date</strong></p>
+          <ul id="dates" class="form-entry__list">
+            <li class="form-entry__list-item">
+              <label class="form-entry__label--date" for="startDate"
+                >Start date
+              </label>
+              <input
+                class="form-entry__input"
+                type="date"
+                name="startDate"
+                id="startDate"
+              />
             </li>
-            <li>
-              <label for="endDate">End date</label>
-              <input type="date" name="endDate" id="endDate" />
+            <li class="form-entry__list-item">
+              <label class="form-entry__label--date" for="endDate"
+                >End date</label
+              >
+              <input
+                class="form-entry__input"
+                type="date"
+                name="endDate"
+                id="endDate"
+              />
+            </li>
+          </ul>
+        </div>
+
+        <div class="form-entry">
+          <p class="form-entry__title"><strong>Rovers</strong></p>
+
+          <ul id="rovers" class="form-entry__list"></ul>
+        </div>
+
+        <div class="form-entry">
+          <p class="form-entry__title"><strong>Rover Cameras</strong></p>
+          <ul id="cameras" class="form-entry__list">
+            <li class="form-entry__list-item">
+              <input
+                type="checkbox"
+                class="camera--disabled checkbox"
+                name="FHAZ"
+                id="FHAZ"
+                disabled
+              />
+              <label class="form-entry__label" for="FHAZ"
+                >Front Hazard Avoidance Camera</label
+              >
+            </li>
+            <li class="form-entry__list-item">
+              <input
+                type="checkbox"
+                class="camera--disabled"
+                name="RHAZ"
+                id="RHAZ"
+                disabled
+              />
+              <label class="form-entry__label" for="RHAZ"
+                >Rear Hazard Avoidance Camera</label
+              >
+            </li>
+            <li class="form-entry__list-item">
+              <input
+                type="checkbox"
+                class="camera--disabled"
+                name="MAST"
+                id="MAST"
+                disabled
+              />
+              <label class="form-entry__label" for="MAST">Mast Camera</label>
+            </li>
+            <li class="form-entry__list-item">
+              <input
+                type="checkbox"
+                class="camera--disabled"
+                name="CHEMCAM"
+                id="CHEMCAM"
+                disabled
+              />
+              <label class="form-entry__label" for="CHEMCAM"
+                >Chemistry and Camera Complex</label
+              >
+            </li>
+            <li class="form-entry__list-item">
+              <input
+                type="checkbox"
+                class="camera--disabled"
+                name="MAHLI"
+                id="MAHLI"
+                disabled
+              />
+              <label class="form-entry__label" for="MAHLI"
+                >Mars Hand Lens Imager</label
+              >
+            </li>
+            <li class="form-entry__list-item">
+              <input
+                type="checkbox"
+                class="camera--disabled"
+                name="MARDI"
+                id="MARDI"
+                disabled
+              />
+              <label class="form-entry__label" for="MARDI"
+                >Mars Descent Imager</label
+              >
+            </li>
+            <li class="form-entry__list-item">
+              <input
+                type="checkbox"
+                class="camera--disabled"
+                name="NAVCAM"
+                id="NAVCAM"
+                disabled
+              />
+              <label class="form-entry__label" for="NAVCAM"
+                >Navigation Camera</label
+              >
+            </li>
+            <li class="form-entry__list-item">
+              <input
+                type="checkbox"
+                class="camera--disabled"
+                name="PANCAM"
+                id="PANCAM"
+                disabled
+              />
+              <label class="form-entry__label" for="PANCAM"
+                >Panoramic Camera</label
+              >
+            </li>
+            <li class="form-entry__list-item">
+              <input
+                type="checkbox"
+                class="camera--disabled"
+                name="MINITES"
+                id="MINITES"
+                disabled
+              />
+              <label class="form-entry__label" for="MINITES"
+                >Miniature Thermal Emission Spectrometer (Mini-TES)</label
+              >
             </li>
           </ul>
         </div>
 
         <div>
-          <p><strong>Rovers</strong></p>
-
-          <ul id="rovers"></ul>
+          <button type="submit" class="btn">Search</button>
         </div>
 
-        <div>
-          <p><strong>Rover Cameras</strong></p>
-          <ul id="cameras">
-            <li>
-              <input type="checkbox" class="camera--disabled" name="FHAZ" id="FHAZ" disabled />
-              <label for="FHAZ">Front Hazard Avoidance Camera</label>
-            </li>
-            <li>
-              <input type="checkbox" class="camera--disabled" name="RHAZ" id="RHAZ" disabled />
-              <label for="RHAZ">Rear Hazard Avoidance Camera</label>
-            </li>
-            <li>
-              <input type="checkbox" class="camera--disabled" name="MAST" id="MAST" disabled />
-              <label for="MAST">Mast Camera</label>
-            </li>
-            <li>
-              <input type="checkbox" class="camera--disabled" name="CHEMCAM" id="CHEMCAM" disabled />
-              <label for="CHEMCAM">Chemistry and Camera Complex</label>
-            </li>
-            <li>
-              <input type="checkbox" class="camera--disabled" name="MAHLI" id="MAHLI" disabled />
-              <label for="MAHLI">Mars Hand Lens Imager</label>
-            </li>
-            <li>
-              <input type="checkbox" class="camera--disabled" name="MARDI" id="MARDI" disabled />
-              <label for="MARDI">Mars Descent Imager</label>
-            </li>
-            <li>
-              <input type="checkbox" class="camera--disabled" name="NAVCAM" id="NAVCAM" disabled />
-              <label for="NAVCAM">Navigation Camera</label>
-            </li>
-            <li>
-              <input type="checkbox" class="camera--disabled" name="PANCAM" id="PANCAM" disabled />
-              <label for="PANCAM">Panoramic Camera</label>
-            </li>
-            <li>
-              <input type="checkbox" class="camera--disabled" name="MINITES" id="MINITES" disabled />
-              <label for="MINITES">Miniature Thermal Emission Spectrometer (Mini-TES)</label>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <button type="submit">Search</button>
-        </div>
+        <p class="error-message hidden">Please fill all fields</p>
       </fieldset>
     </form>
 
     <div id="thumbnails" class="thumbnails loader hidden"></div>
-    <div id="basket" class="hidden">
-      <button id="start-grid" disabled>Start grid</button>
+    <div id="basket" class="basket hidden">
+      <h2 class="section-title">Basket</h2>
+      <button class="btn" id="start-grid" disabled>Start grid</button>
+      <button class="btn" id="remove-all" disabled>Remove all</button>
     </div>
     <div id="thumbnail-popup" class="popup hidden"></div>
 
